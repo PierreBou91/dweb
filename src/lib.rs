@@ -1,11 +1,12 @@
-//! <https://dicom.nema.org/medical/dicom/current/output/chtml/part18/PS3.18.html>
+#![warn(missing_debug_implementations, rust_2018_idioms, missing_docs)]
+//! # dweb
 //!
-//! Above is the link to the "Web Services" of the DICOM standard that will
-//! guide the implementation of this library.
+//! The National Electrical Manufacturers Association (NEMA) has defined a standard for services
+//! that provide access to DICOM data over the web. This crate is an abstraction over the reqwest
+//! crate that provides a client and server implementation of the DICOM Web standard.
 //!
-//! A big part of the documentation of this crate will be copied chunks of the
-//! standard. When this happens, the text will be quoted and the link to the
-//! original text will be provided at the end of the doc comment.
+//! The NEMA documentation for DICOM web services can be found [here](https://dicom.nema.org/medical/dicom/current/output/chtml/part18/PS3.18.html)
+//! and will be referenced a lot throughout this documentation.
 
 pub mod client;
 pub mod core;
