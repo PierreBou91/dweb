@@ -1,73 +1,73 @@
-use futures_util::TryStreamExt;
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Method, Request, Response, Server, StatusCode};
+use actix_web::{web, App, HttpResponse, HttpServer};
 
-/// This is our service handler. It receives a Request, routes on its
-/// path, and returns a Future of a Response.
-async fn echo(req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    match (req.method(), req.uri().path()) {
-        // Serve some instructions at /
-        (&Method::GET, "/") => Ok(Response::new(Body::from(
-            "Try POSTing data to /echo such as: `curl localhost:3000/echo -XPOST -d 'hello world'`",
-        ))),
-
-        // Simply echo the body back to the client.
-        (&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
-
-        // Convert to uppercase before sending back to client using a stream.
-        (&Method::POST, "/echo/uppercase") => {
-            let chunk_stream = req.into_body().map_ok(|chunk| {
-                chunk
-                    .iter()
-                    .map(|byte| byte.to_ascii_uppercase())
-                    .collect::<Vec<u8>>()
-            });
-            Ok(Response::new(Body::wrap_stream(chunk_stream)))
-        }
-
-        // Reverse the entire body before sending back to the client.
-        //
-        // Since we don't know the end yet, we can't simply stream
-        // the chunks as they arrive as we did with the above uppercase endpoint.
-        // So here we do `.await` on the future, waiting on concatenating the full body,
-        // then afterwards the content can be reversed. Only then can we return a `Response`.
-        (&Method::POST, "/echo/reversed") => {
-            let whole_body = hyper::body::to_bytes(req.into_body()).await?;
-
-            let reversed_body = whole_body.iter().rev().cloned().collect::<Vec<u8>>();
-            Ok(Response::new(Body::from(reversed_body)))
-        }
-
-        // Return the 404 Not Found for other routes.
-        _ => {
-            let mut not_found = Response::default();
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            Ok(not_found)
-        }
-    }
-}
-
-async fn shutdown_signal() {
-    // Wait for the CTRL+C signal
-    tokio::signal::ctrl_c()
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().configure(studies_service))
+        .bind(("127.0.0.1", 8080))?
+        .run()
         .await
-        .expect("failed to install CTRL+C signal handler");
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let addr = ([127, 0, 0, 1], 3000).into();
-
-    let service = make_service_fn(|_| async { Ok::<_, hyper::Error>(service_fn(echo)) });
-
-    let server = Server::bind(&addr).serve(service);
-
-    let graceful = server.with_graceful_shutdown(shutdown_signal());
-
-    println!("Listening on http://{}", addr);
-
-    // server.await?;
-    graceful.await?;
-
-    Ok(())
+fn studies_service(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/studies")
+            .route("", web::get().to(HttpResponse::NotImplemented))
+            .route("/{study}", web::get().to(HttpResponse::NotImplemented))
+            .route(
+                "/{study}/metadata",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/rendered",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/metadata",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/rendered",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/metadata",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/rendered",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/frames",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/frames/{frames}",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/frames/{frames}/metadata",
+                web::get().to(HttpResponse::NotImplemented),
+            )
+            .route(
+                "/{study}/series/{serie}/instances/{instance}/frames/{frames}/rendered",
+                web::get().to(HttpResponse::NotImplemented),
+            ),
+    );
 }
