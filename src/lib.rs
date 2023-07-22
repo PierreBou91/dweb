@@ -6,7 +6,6 @@
 //! crate that provides a client and server implementation of the DICOM Web standard.
 //!
 //! The NEMA documentation for DICOM web services can be found [here](https://dicom.nema.org/medical/dicom/current/output/chtml/part18/PS3.18.html)
-//! and will be referenced a lot throughout this documentation.
 
 pub mod client;
 pub mod core;
